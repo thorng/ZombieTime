@@ -12,6 +12,16 @@
     "resources": {
         "media": [
             {
+                "file": "fonts/Roboto-Regular.ttf",
+                "name": "HUMAN_FONT_40",
+                "type": "font"
+            },
+            {
+                "file": "fonts/zombiecontrol3d.ttf",
+                "name": "ZOMBIE_CONTROL_40",
+                "type": "font"
+            },
+            {
                 "file": "fonts/perfect-dos-vga.ttf",
                 "name": "FONT_PERFECT_DOS_15",
                 "type": "font"
