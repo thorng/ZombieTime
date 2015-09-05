@@ -12,8 +12,8 @@
     "resources": {
         "media": [
             {
-                "file": "fonts/Roboto-Regular.ttf",
-                "name": "HUMAN_FONT_40",
+                "file": "fonts/perfect-dos-vga.ttf",
+                "name": "FONT_PERFECT_DOS_48",
                 "type": "font"
             },
             {
@@ -22,13 +22,8 @@
                 "type": "font"
             },
             {
-                "file": "fonts/perfect-dos-vga.ttf",
-                "name": "FONT_PERFECT_DOS_15",
-                "type": "font"
-            },
-            {
-                "file": "fonts/perfect-dos-vga.ttf",
-                "name": "FONT_PERFECT_DOS_48",
+                "file": "fonts/Roboto-Regular.ttf",
+                "name": "HUMAN_FONT_40",
                 "type": "font"
             }
         ]
