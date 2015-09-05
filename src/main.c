@@ -3,10 +3,10 @@
 #define LOCATION_LATITUDE 0
 #define LOCATION_LONGITUDE 1
 	
+#define PERSIST_POINT_COUNTER 10
+	
 static Window *s_main_window;
-
 static TextLayer *s_time_layer, *s_date_layer, *s_location_layer;
-
 static GFont s_time_font, s_date_font, s_location_font;
 
 // latitude/longitude buffers
@@ -23,6 +23,21 @@ int red_or_blue = 0;
 // Point counter
 int point_counter = 0;
 
+static void update_point_counter() {
+	
+	// Check to see if a count already exists
+  if (persist_exists(PERSIST_POINT_COUNTER)) {
+    // Load stored count
+    point_counter = persist_read_int(PERSIST_POINT_COUNTER);
+  }
+	
+	snprintf(point_counter_buffer, sizeof(point_counter_buffer), "Score: %d", point_counter);
+	text_layer_set_text(s_location_layer, point_counter_buffer);
+	
+	persist_write_int(PERSIST_POINT_COUNTER, point_counter);
+	
+}
+
 // BUTTON CLICKS
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
 	if (red_or_blue == 0) {
@@ -37,9 +52,7 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
 		red_or_blue = 1;
 		point_counter++;
 		
-		snprintf(point_counter_buffer, sizeof(point_counter_buffer), "Score: %d", point_counter);
-		text_layer_set_text(s_location_layer, point_counter_buffer);
-		
+		update_point_counter();
 	} else {
 		window_set_background_color(s_main_window, GColorBlue);
 		
@@ -52,9 +65,7 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
 		red_or_blue = 0;
 		point_counter++;
 		
-		snprintf(point_counter_buffer, sizeof(point_counter_buffer), "Score: %d", point_counter);
-		text_layer_set_text(s_location_layer, point_counter_buffer);
-		
+		update_point_counter();
 	}
 }
 
@@ -143,9 +154,9 @@ static void main_window_load(Window *window) {
 	s_date_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_15));
 	text_layer_set_font(s_date_layer, s_date_font);
 	
-	// LOCATION LAYER //
+	// POINT COUNT LAYER //
 	
-	// Create location Layer
+	// Create point Layer
 	s_location_layer = text_layer_create(GRect(0, 130, 144, 25));
 	text_layer_set_background_color(s_location_layer, GColorClear);
 	text_layer_set_text_color(s_location_layer, GColorWhite);
@@ -260,10 +271,14 @@ static void init() {
 	
 	// Make sure the time is displayed from the start
 	update_time();
+	
+	// Make sure point counter is updated and displayed from the start
+	update_point_counter();
 }
 
 static void deinit() {
 	// Destroy Window
+	persist_write_int(point_counter, point_counter);
 	window_destroy(s_main_window);
 }
 
