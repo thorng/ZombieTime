@@ -1,5 +1,8 @@
 {
-    "appKeys": {},
+    "appKeys": {
+        "LOCATION_LATITUDE": 0,
+        "LOCATION_LONGITUDE": 1
+    },
     "capabilities": [
         "location"
     ],
@@ -10,6 +13,11 @@
         "media": [
             {
                 "file": "fonts/perfect-dos-vga.ttf",
+                "name": "FONT_PERFECT_DOS_15",
+                "type": "font"
+            },
+            {
+                "file": "fonts/perfect-dos-vga.ttf",
                 "name": "FONT_PERFECT_DOS_48",
                 "type": "font"
             }
@@ -18,7 +26,6 @@
     "sdkVersion": "3",
     "shortName": "ZombieTime",
     "targetPlatforms": [
-        "aplite",
         "basalt"
     ],
     "uuid": "01f162c8-c936-4fdb-92af-423f203e5f4a",
