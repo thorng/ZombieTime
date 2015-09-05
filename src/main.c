@@ -12,20 +12,51 @@ static GFont s_time_font;
 static GFont s_location_font;
 
 // latitude/longitude buffers
-static char latitude_buffer[32];
-static char longitude_buffer[32];
-static char full_location_buffer[32];
+// static char latitude_buffer[32];
+// static char longitude_buffer[32];
+// static char full_location_buffer[32];
 
+// point counter buffer
+static char point_counter_buffer[32];
+
+// ZOMBIE OR HUMAN?
 int red_or_blue = 0;
+
+// Point counter
+int point_counter = 0;
 
 // BUTTON CLICKS
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
 	if (red_or_blue == 0) {
 		window_set_background_color(s_main_window, GColorRed);
+		
+		// Create GFont
+		s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ZOMBIE_CONTROL_40));
+
+		// Apply GFont to TextLayer
+		text_layer_set_font(s_time_layer, s_time_font);
+		
 		red_or_blue = 1;
+		point_counter++;
+		
+		snprintf(point_counter_buffer, sizeof(point_counter_buffer), "%d", point_counter);
+		text_layer_set_text(s_location_layer, point_counter_buffer);
+		
 	} else {
 		window_set_background_color(s_main_window, GColorBlue);
+		
+		// Create GFont
+		s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_HUMAN_FONT_40));
+
+		// Apply GFont to TextLayer
+		text_layer_set_font(s_time_layer, s_time_font);
+		
 		red_or_blue = 0;
+		point_counter++;
+		
+		snprintf(point_counter_buffer, sizeof(point_counter_buffer), "%d", point_counter);
+		text_layer_set_text(s_location_layer, point_counter_buffer);
+		
 	}
 }
 
@@ -85,7 +116,7 @@ static void main_window_load(Window *window) {
   text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
 	
 	// Create GFont
-	s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_48));
+	s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_HUMAN_FONT_40));
 
 	// Apply GFont to TextLayer
 	text_layer_set_font(s_time_layer, s_time_font);
@@ -93,11 +124,15 @@ static void main_window_load(Window *window) {
   // Add it as a child layer to the Window's root layer
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layer));
 	
+	// LOCATION LAYER
+	
 	// Create location Layer
 	s_location_layer = text_layer_create(GRect(0, 130, 144, 25));
 	text_layer_set_background_color(s_location_layer, GColorClear);
 	text_layer_set_text_color(s_location_layer, GColorWhite);
 	text_layer_set_text_alignment(s_location_layer, GTextAlignmentCenter);
+	
+	// Print out point counter on app
 	text_layer_set_text(s_location_layer, "Loading...");
 	
 	// Create second custom font, apply it and add to Window
@@ -130,11 +165,11 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     switch(t->key) {
     case LOCATION_LATITUDE:
   		printf("latitude %s", t->value->cstring);
-			snprintf(latitude_buffer, sizeof(latitude_buffer), "%s", t->value->cstring);
+			//snprintf(latitude_buffer, sizeof(latitude_buffer), "%s", t->value->cstring);
       break;
     case LOCATION_LONGITUDE:
 			printf("longitude %s", t->value->cstring);
-			snprintf(longitude_buffer, sizeof(longitude_buffer), "%s", t->value->cstring);
+			//snprintf(longitude_buffer, sizeof(longitude_buffer), "%s", t->value->cstring);
       break;
     default:
       APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
@@ -146,10 +181,17 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   }
 	
 	// Assemble full string and display
-	snprintf(full_location_buffer, sizeof(full_location_buffer), "%s, %s", latitude_buffer, longitude_buffer);
-	text_layer_set_text(s_location_layer, full_location_buffer);
+	//snprintf(full_location_buffer, sizeof(full_location_buffer), "%s, %s", latitude_buffer, longitude_buffer);
+	//text_layer_set_text(s_location_layer, full_location_buffer);	
 	
+	snprintf(point_counter_buffer, sizeof(point_counter_buffer), "%d", point_counter);
+	text_layer_set_text(s_location_layer, point_counter_buffer);
 }
+
+// static void point_counter_display() {
+// 	snprintf(point_counter_buffer, sizeof(point_counter_buffer), "%d", point_counter);
+// 	text_layer_set_text(s_location_layer, point_counter_buffer);
+// }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
   APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped!");
