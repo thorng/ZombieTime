@@ -1,7 +1,7 @@
 {
     "appKeys": {},
     "capabilities": [
-        ""
+        "location"
     ],
     "companyName": "timothyhorng@gmail.com",
     "longName": "ZombieTime",
@@ -17,6 +17,10 @@
     },
     "sdkVersion": "3",
     "shortName": "ZombieTime",
+    "targetPlatforms": [
+        "aplite",
+        "basalt"
+    ],
     "uuid": "01f162c8-c936-4fdb-92af-423f203e5f4a",
     "versionLabel": "1.0",
     "watchapp": {
