@@ -85,7 +85,7 @@ static void update_time() {
 	
 	// Copy date into buffer from tm structure
 	static char date_buffer[16];
-	strftime(date_buffer, sizeof(date_buffer), "%a %d %b", tick_time);
+	strftime(date_buffer, sizeof(date_buffer), "%a, %d %b", tick_time);
 
 	// Show the date
 	text_layer_set_text(s_date_layer, date_buffer);
@@ -153,6 +153,9 @@ static void main_window_load(Window *window) {
 	
 	// Print out point counter on app
 	text_layer_set_text(s_location_layer, "Loading...");
+	
+	snprintf(point_counter_buffer, sizeof(point_counter_buffer), "Score: %d", point_counter);
+	text_layer_set_text(s_location_layer, point_counter_buffer);
 	
 	// Create second custom font, apply it and add to Window
 	s_location_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_15));
