@@ -11,9 +11,28 @@ static TextLayer *s_location_layer;
 static GFont s_time_font;
 static GFont s_location_font;
 
+// latitude/longitude buffers
 static char latitude_buffer[32];
 static char longitude_buffer[32];
 static char full_location_buffer[32];
+
+int red_or_blue = 0;
+
+// BUTTON CLICKS
+static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
+	if (red_or_blue == 0) {
+		window_set_background_color(s_main_window, GColorRed);
+		red_or_blue = 1;
+	} else {
+		window_set_background_color(s_main_window, GColorBlue);
+		red_or_blue = 0;
+	}
+}
+
+static void click_config_provider(void *context) {
+  // Register the ClickHandlers
+  window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
+}
 
 static void update_time() {
   // Get a tm structure
@@ -55,7 +74,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 
 static void main_window_load(Window *window) {
 	
-	window_set_background_color(window, GColorBlack);
+	window_set_background_color(window, GColorBlue);
 		
 	// Create time TextLayer
 	s_time_layer = text_layer_create(GRect(5, 52, 139, 50));
@@ -157,6 +176,9 @@ static void init() {
 	
   // Create main Window element and assign to pointer
   s_main_window = window_create();
+	
+	// Register the config provider with the window when it is being created
+	window_set_click_config_provider(s_main_window, click_config_provider);
 	
 	// Register with TickTimerService
 	tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
