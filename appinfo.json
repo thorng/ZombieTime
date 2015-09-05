@@ -1,0 +1,19 @@
+{
+    "appKeys": {},
+    "capabilities": [
+        ""
+    ],
+    "companyName": "timothyhorng@gmail.com",
+    "longName": "ZombieTime",
+    "projectType": "native",
+    "resources": {
+        "media": []
+    },
+    "sdkVersion": "3",
+    "shortName": "ZombieTime",
+    "uuid": "01f162c8-c936-4fdb-92af-423f203e5f4a",
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": false
+    }
+}
