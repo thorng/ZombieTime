@@ -5,11 +5,9 @@
 	
 static Window *s_main_window;
 
-static TextLayer *s_time_layer;
-static TextLayer *s_location_layer;
+static TextLayer *s_time_layer, *s_date_layer, *s_location_layer;
 
-static GFont s_time_font;
-static GFont s_location_font;
+static GFont s_time_font, s_date_font, s_location_font;
 
 // latitude/longitude buffers
 // static char latitude_buffer[32];
@@ -39,7 +37,7 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
 		red_or_blue = 1;
 		point_counter++;
 		
-		snprintf(point_counter_buffer, sizeof(point_counter_buffer), "%d", point_counter);
+		snprintf(point_counter_buffer, sizeof(point_counter_buffer), "Score: %d", point_counter);
 		text_layer_set_text(s_location_layer, point_counter_buffer);
 		
 	} else {
@@ -54,7 +52,7 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
 		red_or_blue = 0;
 		point_counter++;
 		
-		snprintf(point_counter_buffer, sizeof(point_counter_buffer), "%d", point_counter);
+		snprintf(point_counter_buffer, sizeof(point_counter_buffer), "Score: %d", point_counter);
 		text_layer_set_text(s_location_layer, point_counter_buffer);
 		
 	}
@@ -84,6 +82,13 @@ static void update_time() {
 
   // Display this time on the TextLayer
   text_layer_set_text(s_time_layer, buffer);
+	
+	// Copy date into buffer from tm structure
+	static char date_buffer[16];
+	strftime(date_buffer, sizeof(date_buffer), "%a %d %b", tick_time);
+
+	// Show the date
+	text_layer_set_text(s_date_layer, date_buffer);
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -106,7 +111,9 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 static void main_window_load(Window *window) {
 	
 	window_set_background_color(window, GColorBlue);
-		
+	
+	// TIME LAYER //
+	
 	// Create time TextLayer
 	s_time_layer = text_layer_create(GRect(5, 52, 139, 50));
   text_layer_set_background_color(s_time_layer, GColorClear);
@@ -124,7 +131,19 @@ static void main_window_load(Window *window) {
   // Add it as a child layer to the Window's root layer
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layer));
 	
-	// LOCATION LAYER
+	// DATE LAYER //
+	
+	// Create date TextLayer
+	s_date_layer = text_layer_create(GRect(0, 0, 144, 25));
+	text_layer_set_text_color(s_date_layer, GColorWhite);
+	text_layer_set_background_color(s_date_layer, GColorClear);
+	text_layer_set_text_alignment(s_date_layer, GTextAlignmentCenter);
+
+	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_date_layer));
+	s_date_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_15));
+	text_layer_set_font(s_date_layer, s_date_font);
+	
+	// LOCATION LAYER //
 	
 	// Create location Layer
 	s_location_layer = text_layer_create(GRect(0, 130, 144, 25));
@@ -144,9 +163,11 @@ static void main_window_load(Window *window) {
 static void main_window_unload(Window *window) {
 	// Unload GFont
 	fonts_unload_custom_font(s_time_font);
-	
+	fonts_unload_custom_font(s_date_font);
+
 	// Destroy TextLayer
 	text_layer_destroy(s_time_layer);
+	text_layer_destroy(s_date_layer);
 	
 	// Destroy location elements
 	text_layer_destroy(s_location_layer);
@@ -184,7 +205,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 	//snprintf(full_location_buffer, sizeof(full_location_buffer), "%s, %s", latitude_buffer, longitude_buffer);
 	//text_layer_set_text(s_location_layer, full_location_buffer);	
 	
-	snprintf(point_counter_buffer, sizeof(point_counter_buffer), "%d", point_counter);
+	snprintf(point_counter_buffer, sizeof(point_counter_buffer), "Score: %d", point_counter);
 	text_layer_set_text(s_location_layer, point_counter_buffer);
 }
 
