@@ -1,5 +1,6 @@
 #ifndef _ZOMBIE_H
 #define _ZOMBIE_H
+#include <pebble.h>
 
 #define LOCATION_LATITUDE 0
 #define LOCATION_LONGITUDE 1
