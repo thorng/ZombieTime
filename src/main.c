@@ -4,6 +4,7 @@
 #define LOCATION_LONGITUDE 1
 	
 #define PERSIST_POINT_COUNTER 10
+#define PERSIST_HUMANORZOMBIE 11
 	
 static Window *s_main_window;
 static TextLayer *s_time_layer, *s_date_layer, *s_location_layer;
@@ -17,29 +18,31 @@ static GFont s_time_font, s_date_font, s_location_font;
 // point counter buffer
 static char point_counter_buffer[32];
 
-// ZOMBIE OR HUMAN?
+// ZOMBIE OR HUMAN? Human = 0 = blue; Zombie = 1 = red;
 int red_or_blue = 0;
 
 // Point counter
 int point_counter = 0;
 
 static void update_point_counter() {
+	snprintf(point_counter_buffer, sizeof(point_counter_buffer), "Score: %d", point_counter);
+	text_layer_set_text(s_location_layer, point_counter_buffer);
 	
+	persist_write_int(PERSIST_POINT_COUNTER, point_counter);
+}
+
+static void read_point_counter() {
 	// Check to see if a count already exists
   if (persist_exists(PERSIST_POINT_COUNTER)) {
     // Load stored count
     point_counter = persist_read_int(PERSIST_POINT_COUNTER);
   }
 	
-	snprintf(point_counter_buffer, sizeof(point_counter_buffer), "Score: %d", point_counter);
-	text_layer_set_text(s_location_layer, point_counter_buffer);
-	
-	persist_write_int(PERSIST_POINT_COUNTER, point_counter);
-	
+	update_point_counter();
 }
 
-// BUTTON CLICKS
-static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
+static void update_humanorzombie() {
+	// 0 = Human, 1 = Zombie
 	if (red_or_blue == 0) {
 		window_set_background_color(s_main_window, GColorRed);
 		
@@ -49,11 +52,17 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
 		// Apply GFont to TextLayer
 		text_layer_set_font(s_time_layer, s_time_font);
 		
-		red_or_blue = 1;
-		point_counter++;
+		red_or_blue = 1; // change to zombie
+		status_t success = 	persist_write_int(PERSIST_HUMANORZOMBIE, 1);
+		//persist_write_int(PERSIST_HUMANORZOMBIE, 1);
+		
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "%d", (int)success);
+
+		point_counter++; 
 		
 		update_point_counter();
-	} else {
+		
+	} else if (red_or_blue == 1) {
 		window_set_background_color(s_main_window, GColorBlue);
 		
 		// Create GFont
@@ -62,11 +71,56 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
 		// Apply GFont to TextLayer
 		text_layer_set_font(s_time_layer, s_time_font);
 		
-		red_or_blue = 0;
-		point_counter++;
+		red_or_blue = 0; // change to human
+		status_t success = persist_write_int(PERSIST_HUMANORZOMBIE, 0);
 		
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "%d", (int)success);
+
+		point_counter++;
+
 		update_point_counter();
+	} else {
+		window_set_background_color(s_main_window, GColorBlack);
 	}
+}
+
+static void read_humanorzombie() {
+	
+	// Check to see if human or zombie already exists
+  if (persist_exists(PERSIST_HUMANORZOMBIE)) {
+    // Load stored count
+    red_or_blue = persist_read_int(PERSIST_HUMANORZOMBIE);
+  }
+	
+	if (red_or_blue == 0) {
+		window_set_background_color(s_main_window, GColorBlue);
+		
+		// Create GFont
+		s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_HUMAN_FONT_40));
+
+		// Apply GFont to TextLayer
+		text_layer_set_font(s_time_layer, s_time_font);
+		
+		persist_write_int(PERSIST_HUMANORZOMBIE, 0);
+	} else if (red_or_blue == 1) {
+		window_set_background_color(s_main_window, GColorRed);
+		
+		// Create GFont
+		s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ZOMBIE_CONTROL_40));
+
+		// Apply GFont to TextLayer
+		text_layer_set_font(s_time_layer, s_time_font);
+		
+		persist_write_int(PERSIST_HUMANORZOMBIE, 1);
+	} else {
+		window_set_background_color(s_main_window, GColorBlack);
+	}
+	
+}
+
+// BUTTON CLICKS
+static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
+	update_humanorzombie();
 }
 
 static void click_config_provider(void *context) {
@@ -273,7 +327,10 @@ static void init() {
 	update_time();
 	
 	// Make sure point counter is updated and displayed from the start
-	update_point_counter();
+	read_point_counter();
+	
+	// Make sure human or zombie persists and is displayed from the start
+	read_humanorzombie();
 }
 
 static void deinit() {
