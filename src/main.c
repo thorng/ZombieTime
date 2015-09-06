@@ -41,8 +41,8 @@ static char point_counter_buffer[32];
 int red_or_blue = 0;
 
 //Led toggles,
-int tpin23 = 1;
-int tpin22 = 0;
+//int tpin23 = 1;
+//int tpin22 = 0;
 
 // Point counter
 int point_counter = 0;
@@ -107,7 +107,6 @@ static void prv_set_led_attribute(bool on) {
   }
 }
 
-
 static void prv_set_tpin23_attribute(bool on) {
   SmartstrapResult result;
   uint8_t *buffer;
@@ -170,8 +169,8 @@ static void update_humanorzombie() {
 		text_layer_set_font(s_time_layer, s_time_font);
 		
 		red_or_blue = 1; // change to zombie
-    tpin23_attribute = 0;
-    tpin22_attribute = 1;
+    prv_set_tpin23_attribute(false);
+    prv_set_tpin22_attribute(true);
 		status_t success = 	persist_write_int(PERSIST_HUMANORZOMBIE, 1);
 		//persist_write_int(PERSIST_HUMANORZOMBIE, 1);
 		
@@ -191,8 +190,8 @@ static void update_humanorzombie() {
 		text_layer_set_font(s_time_layer, s_time_font);
 		
 		red_or_blue = 0; // change to human
-    tpin23_attribute = 1;
-    tpin22_attribute = 0;
+    prv_set_tpin23_attribute(true);
+    prv_set_tpin22_attribute(false);
 		status_t success = persist_write_int(PERSIST_HUMANORZOMBIE, 0);
 		
 		APP_LOG(APP_LOG_LEVEL_DEBUG, "%d", (int)success);
