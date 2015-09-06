@@ -1,10 +1,7 @@
 {
-    "appKeys": {
-        "LOCATION_LATITUDE": 0,
-        "LOCATION_LONGITUDE": 1
-    },
+    "appKeys": {},
     "capabilities": [
-        "location"
+        ""
     ],
     "companyName": "timothyhorng@gmail.com",
     "longName": "ZombieTime",
@@ -12,13 +9,8 @@
     "resources": {
         "media": [
             {
-                "file": "fonts/perfect-dos-vga.ttf",
-                "name": "FONT_PERFECT_DOS_15",
-                "type": "font"
-            },
-            {
-                "file": "fonts/perfect-dos-vga.ttf",
-                "name": "FONT_PERFECT_DOS_48",
+                "file": "fonts/Roboto-Regular.ttf",
+                "name": "HUMAN_FONT_40",
                 "type": "font"
             },
             {
@@ -27,8 +19,8 @@
                 "type": "font"
             },
             {
-                "file": "fonts/Roboto-Regular.ttf",
-                "name": "HUMAN_FONT_40",
+                "file": "fonts/perfect-dos-vga.ttf",
+                "name": "FONT_PERFECT_DOS_15",
                 "type": "font"
             }
         ]
