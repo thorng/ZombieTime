@@ -44,6 +44,7 @@ static GFont s_location_font;
 
 static char point_counter_buffer[32];
 static int point_counter = 0;
+static bool smart_enabled = false;
 
 // Function prototypes
 // main.c
@@ -83,15 +84,9 @@ void prv_availability_changed(SmartstrapServiceId service_id, bool available) {
   if (service_id != SERVICE_ID) {
     return;
   }
-/**
-  if (available) {
-    text_layer_set_background_color(status_text_layer, GColorGreen);
-    text_layer_set_text(status_text_layer, "Connected!");
-  } else {
-    text_layer_set_background_color(status_text_layer, GColorRed);
-    text_layer_set_text(status_text_layer, "Disconnected!");
-  }
-  */
+  
+  smart_enabled = available;
+  
 }
 
 // BUTTON CLICKS
@@ -101,23 +96,12 @@ void select_click_handler(ClickRecognizerRef recognizer, void *context) {
 
 void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_time();
-
-  // Get location update every minute
-  if(tick_time->tm_min % 1 == 0) {
-    // Begin dictionary
-    DictionaryIterator *iter;
-    app_message_outbox_begin(&iter);
-
-    // Add a key-value pair
-    dict_write_uint8(iter, 0, 0);
-
-    // Send the message!
-    app_message_outbox_send();
-  }
 }
 
 
 void prv_set_race_attribute(enum Race currentRace) {
+  if(!smart_enabled)
+    return;
   SmartstrapResult result;
   uint8_t *buffer;
   size_t length;
@@ -160,14 +144,9 @@ void read_race() {
 }
 
 void update_point_counter() {
-  
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "1");
 	snprintf(point_counter_buffer, sizeof(point_counter_buffer), "Score: %d", point_counter);
   
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "2");
 	text_layer_set_text(s_location_layer, point_counter_buffer);
-  
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "3");
 	
 	persist_write_int(PERSIST_POINT_COUNTER, point_counter);
 }
@@ -203,11 +182,11 @@ void update_race() {
   point_counter++;
 
   update_point_counter();
+  
+  prv_set_race_attribute(race);
 }
 
 void update_time() {
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Updating time");
-  
   // Get a tm structure
   time_t temp = time(NULL); 
   struct tm *tick_time = localtime(&temp);
@@ -223,11 +202,12 @@ void update_time() {
     // Use 12 hour format
     strftime(buffer, sizeof("00:00"), "%I:%M", tick_time);
   }
-
+  
   // Display this time on the TextLayer
   text_layer_set_text(s_time_layer, buffer);
 	
 	// Copy date into buffer from tm structure
+  
 	static char date_buffer[16];
 	strftime(date_buffer, sizeof(date_buffer), "%a, %d %b", tick_time);
 
@@ -316,7 +296,7 @@ static void init() {
 	window_set_click_config_provider(s_main_window, click_config_provider);
 	
 	// Register with TickTimerService
-  tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+  //tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
 
   // Set handlers to manage the elements inside the Window
   window_set_window_handlers(s_main_window, (WindowHandlers) {
@@ -328,7 +308,7 @@ static void init() {
   window_stack_push(s_main_window, true);
 	
 	// Make sure the time is displayed from the start
-	update_time();
+  update_time();
 	
 	// Make sure point counter is updated and displayed from the start
 	read_point_counter();
