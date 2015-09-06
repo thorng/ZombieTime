@@ -1,6 +1,10 @@
 #include <pebble.h>
 #include "zombie.h"
 
+void attribute_setup(attribute_tuple *tuple) {
+ (*tuple).ptr = smartstrap_attribute_create(SERVICE_ID, (*tuple).id, (*tuple).length);
+}
+
 static void init() {
 	
   // Create main Window element and assign to pointer
@@ -31,25 +35,22 @@ static void init() {
 	//read_humanorzombie();
   
   //Smartstrap setup
-    // setup smartstrap
-    /*
+  // setup smartstrap
+
   SmartstrapHandlers handlers = (SmartstrapHandlers) {
     .availability_did_change = prv_availability_changed,
-//    .did_read = prv_did_read,
-//    .notified = prv_notified,
+    //.did_read = prv_did_read,
+    //.notified = prv_notified,
   };
   smartstrap_subscribe(handlers);
-  attribute.led.ptr = smartstrap_attribute_create(SERVICE_ID, attribute.led.id, attribute.led.length);
-  attribute.tpin23.ptr = smartstrap_attribute_create(SERVICE_ID, attribute.tpin23.id, attribute.tpin23.length);
-  attribute.tpin22.ptr = smartstrap_attribute_create(SERVICE_ID, attribute.tpin22.id, attribute.tpin22.length);
-  */
+  attribute_setup(&attribute.race);
 }
 
 static void deinit() {
 	// Destroy Window
 	//persist_write_int(point_counter, point_counter);
 	window_destroy(s_main_window);
-  //smartstrap_attribute_destroy(attribute.led.ptr);
+  smartstrap_attribute_destroy(attribute.race.ptr);
   //smartstrap_attribute_destroy(attribute.tpin23.ptr);
   //smartstrap_attribute_destroy(attribute.tpin22.ptr);
 }

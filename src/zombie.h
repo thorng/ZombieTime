@@ -69,9 +69,13 @@ void prv_set_race_attribute(enum Race currentRace);
 void read_point_counter();
 void read_race();
 
-// ext.c
+// update.c
 void update_point_counter(void);
 void update_race();
 void update_time();
+
+// callback.c
+void click_config_provider(void *context);
+void prv_availability_changed(SmartstrapServiceId service_id, bool available);
 
 #endif
