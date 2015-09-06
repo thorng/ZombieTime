@@ -1,23 +1,38 @@
 #include <pebble.h>
 
-//Smartstrap start
-  
+int main(void);
+
 static const SmartstrapServiceId SERVICE_ID = 0x1001;
-static const SmartstrapAttributeId LED_ATTRIBUTE_ID = 0x0001;
-static const size_t LED_ATTRIBUTE_LENGTH = 1;
-static const SmartstrapAttributeId UPTIME_ATTRIBUTE_ID = 0x0002;
-static const size_t UPTIME_ATTRIBUTE_LENGTH = 4;
-static const SmartstrapAttributeId TPIN23_ATTRIBUTE_ID = 0x0003;
-static const size_t TPIN23_ATTRIBUTE_LENGTH = 1;
-static const SmartstrapAttributeId TPIN22_ATTRIBUTE_ID = 0x0004;
-static const size_t TPIN22_ATTRIBUTE_LENGTH = 1;
 
+typedef struct {
+  SmartstrapAttributeId id;
+  size_t length;
+  SmartstrapAttribute *ptr;
+} attribute_tuple;
 
+typedef struct {
+  attribute_tuple led;
+  attribute_tuple tpin23;
+  attribute_tuple tpin22;
+} Attribute;
 
-static SmartstrapAttribute *led_attribute;
-static SmartstrapAttribute *uptime_attribute;
-static SmartstrapAttribute *tpin23_attribute;
-static SmartstrapAttribute *tpin22_attribute;
+static Attribute attribute = {
+  .led = {
+    0x0001,
+    1,
+    NULL
+  },
+  .tpin22 = {
+    0x0003,
+    1,
+    NULL
+  },
+  .tpin23 = {
+    0x0004,
+    1,
+    NULL
+  }
+};
 
 #define LOCATION_LATITUDE 0
 #define LOCATION_LONGITUDE 1
@@ -69,30 +84,11 @@ static void prv_availability_changed(SmartstrapServiceId service_id, bool availa
 //  }
 }
 
-//static void prv_did_read(SmartstrapAttribute *attr, SmartstrapResult result,
-//                         const uint8_t *data, size_t length) {
-//  if (attr != uptime_attribute) {
-//    return;
-//  }
-//  if (result != SmartstrapResultOk) {
-//    APP_LOG(APP_LOG_LEVEL_ERROR, "Read failed with result %d", result);
-//    return;
-//  }
-//  if (length != UPTIME_ATTRIBUTE_LENGTH) {
-//    APP_LOG(APP_LOG_LEVEL_ERROR, "Got response of unexpected length (%d)", length);
-//    return;
-//  }
-
-//  static char uptime_buffer[20];
-//  snprintf(uptime_buffer, 20, "%u", (unsigned int)*(uint32_t *)data);
-//  text_layer_set_text(uptime_text_layer, uptime_buffer);
-//}
-
 static void prv_set_led_attribute(bool on) {
   SmartstrapResult result;
   uint8_t *buffer;
   size_t length;
-  result = smartstrap_attribute_begin_write(led_attribute, &buffer, &length);
+  result = smartstrap_attribute_begin_write(attribute.led.ptr, &buffer, &length);
   if (result != SmartstrapResultOk) {
     APP_LOG(APP_LOG_LEVEL_ERROR, "Begin write failed with error %d", result);
     return;
@@ -100,7 +96,7 @@ static void prv_set_led_attribute(bool on) {
 
   buffer[0] = on;
 
-  result = smartstrap_attribute_end_write(led_attribute, 1, false);
+  result = smartstrap_attribute_end_write(attribute.led.ptr, 1, false);
   if (result != SmartstrapResultOk) {
     APP_LOG(APP_LOG_LEVEL_ERROR, "End write failed with error %d", result);
     return;
@@ -111,7 +107,7 @@ static void prv_set_tpin23_attribute(bool on) {
   SmartstrapResult result;
   uint8_t *buffer;
   size_t length;
-  result = smartstrap_attribute_begin_write(tpin23_attribute, &buffer, &length);
+  result = smartstrap_attribute_begin_write(attribute.tpin23.ptr, &buffer, &length);
   if (result != SmartstrapResultOk) {
     APP_LOG(APP_LOG_LEVEL_ERROR, "Begin write failed with error %d", result);
     return;
@@ -119,7 +115,7 @@ static void prv_set_tpin23_attribute(bool on) {
 
   buffer[0] = on;
 
-  result = smartstrap_attribute_end_write(tpin23_attribute, 1, false);
+  result = smartstrap_attribute_end_write(attribute.tpin23.ptr, 1, false);
   if (result != SmartstrapResultOk) {
     APP_LOG(APP_LOG_LEVEL_ERROR, "End write failed with error %d", result);
     return;
@@ -130,7 +126,7 @@ static void prv_set_tpin22_attribute(bool on) {
   SmartstrapResult result;
   uint8_t *buffer;
   size_t length;
-  result = smartstrap_attribute_begin_write(tpin22_attribute, &buffer, &length);
+  result = smartstrap_attribute_begin_write(attribute.tpin22.ptr, &buffer, &length);
   if (result != SmartstrapResultOk) {
     APP_LOG(APP_LOG_LEVEL_ERROR, "Begin write failed with error %d", result);
     return;
@@ -138,7 +134,7 @@ static void prv_set_tpin22_attribute(bool on) {
 
   buffer[0] = on;
 
-  result = smartstrap_attribute_end_write(tpin22_attribute, 1, false);
+  result = smartstrap_attribute_end_write(attribute.tpin22.ptr, 1, false);
   if (result != SmartstrapResultOk) {
     APP_LOG(APP_LOG_LEVEL_ERROR, "End write failed with error %d", result);
     return;
@@ -459,20 +455,18 @@ static void init() {
 //    .notified = prv_notified,
   };
   smartstrap_subscribe(handlers);
-  led_attribute = smartstrap_attribute_create(SERVICE_ID, LED_ATTRIBUTE_ID, LED_ATTRIBUTE_LENGTH);
-  uptime_attribute = smartstrap_attribute_create(SERVICE_ID, UPTIME_ATTRIBUTE_ID, UPTIME_ATTRIBUTE_LENGTH);
-  tpin23_attribute = smartstrap_attribute_create(SERVICE_ID, TPIN23_ATTRIBUTE_ID, TPIN23_ATTRIBUTE_LENGTH);
-  tpin22_attribute = smartstrap_attribute_create(SERVICE_ID, TPIN22_ATTRIBUTE_ID, TPIN22_ATTRIBUTE_LENGTH);
+  attribute.led.ptr = smartstrap_attribute_create(SERVICE_ID, attribute.led.id, attribute.led.length);
+  attribute.tpin23.ptr = smartstrap_attribute_create(SERVICE_ID, attribute.tpin23.id, attribute.tpin23.length);
+  attribute.tpin22.ptr = smartstrap_attribute_create(SERVICE_ID, attribute.tpin22.id, attribute.tpin22.length);
 }
 
 static void deinit() {
 	// Destroy Window
 	persist_write_int(point_counter, point_counter);
 	window_destroy(s_main_window);
-  smartstrap_attribute_destroy(led_attribute);
-  smartstrap_attribute_destroy(uptime_attribute);
-  smartstrap_attribute_destroy(tpin23_attribute);
-  smartstrap_attribute_destroy(tpin22_attribute);
+  smartstrap_attribute_destroy(attribute.led.ptr);
+  smartstrap_attribute_destroy(attribute.tpin23.ptr);
+  smartstrap_attribute_destroy(attribute.tpin22.ptr);
 }
 
 int main(void) {
