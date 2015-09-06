@@ -1,6 +1,12 @@
 #ifndef _ZOMBIE_H
 #define _ZOMBIE_H
 
+#define LOCATION_LATITUDE 0
+#define LOCATION_LONGITUDE 1
+  
+#define PERSIST_POINT_COUNTER 10
+#define PERSIST_RACE 11
+
 // Constants, structs, and enums
 static const SmartstrapServiceId SERVICE_ID = 0x1001;
 
@@ -56,5 +62,16 @@ void main_window_unload(Window *window);
 // handlers.c
 void select_click_handler(ClickRecognizerRef recognizer, void *context);
 void click_config_provider(void *context);
+void tick_handler(struct tm *tick_time, TimeUnits units_changed);
+
+// storage.c
+void prv_set_race_attribute(enum Race currentRace);
+void read_point_counter();
+void read_race();
+
+// ext.c
+void update_point_counter(void);
+void update_race();
+void update_time();
 
 #endif

@@ -1,13 +1,7 @@
 #include <pebble.h>
 #include "zombie.h"
 
-#define LOCATION_LATITUDE 0
-#define LOCATION_LONGITUDE 1
-	
-#define PERSIST_POINT_COUNTER 10
-#define PERSIST_RACE 11
-
-static void update_point_counter() {
+void update_point_counter() {
 	snprintf(point_counter_buffer, sizeof(point_counter_buffer), "Score: %d", point_counter);
 	text_layer_set_text(s_location_layer, point_counter_buffer);
 	
@@ -30,113 +24,40 @@ static void prv_availability_changed(SmartstrapServiceId service_id, bool availa
   */
 }
 
-static void prv_set_led_attribute(enum Race currentRace) {
-  SmartstrapResult result;
-  uint8_t *buffer;
-  size_t length;
-  result = smartstrap_attribute_begin_write(attribute.race.ptr, &buffer, &length);
-  if (result != SmartstrapResultOk) {
-    APP_LOG(APP_LOG_LEVEL_ERROR, "Begin write failed with error %d", result);
-    return;
-  }
+void update_race() {
+  status_t success;
 
-  memcpy(buffer, &currentRace, sizeof(currentRace));
-
-  result = smartstrap_attribute_end_write(attribute.race.ptr, sizeof(currentRace), false);
-  if (result != SmartstrapResultOk) {
-    APP_LOG(APP_LOG_LEVEL_ERROR, "End write failed with error %d", result);
-    return;
-  }
-}
-
-//Smartstrap Code End
-
-static void read_point_counter() {
-	// Check to see if a count already exists
-  if (persist_exists(PERSIST_POINT_COUNTER)) {
-    // Load stored count
-    point_counter = persist_read_int(PERSIST_POINT_COUNTER);
-  }
-	
-	update_point_counter();
-}
-
-static void update_humanorzombie() {
   if (race == human) {
 		window_set_background_color(s_main_window, GColorRed);
-		
-		// Create GFont
-		s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ZOMBIE_CONTROL_40));
 
-		// Apply GFont to TextLayer
-		text_layer_set_font(s_time_layer, s_time_font);
+    // Create GFont
+    s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ZOMBIE_CONTROL_40));
 		
     race = zombie;
-		status_t success = 	persist_write_int(PERSIST_RACE, 1);
-		//persist_write_int(PERSIST_RACE, 1);
-		
-		APP_LOG(APP_LOG_LEVEL_DEBUG, "%d", (int)success);
-
-		point_counter++; 
-		
-		update_point_counter();
-		
+		success = 	persist_write_int(PERSIST_RACE, 1);
 	} else if (race == zombie) {
 		window_set_background_color(s_main_window, GColorBlue);
 		
 		// Create GFont
 		s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_HUMAN_FONT_40));
-
-		// Apply GFont to TextLayer
-		text_layer_set_font(s_time_layer, s_time_font);
 		
 		race = human;
-		status_t success = persist_write_int(PERSIST_RACE, 0);
-		
-		APP_LOG(APP_LOG_LEVEL_DEBUG, "%d", (int)success);
-
-		point_counter++;
-
-		update_point_counter();
+		success = persist_write_int(PERSIST_RACE, 0);
 	} else {
 		window_set_background_color(s_main_window, GColorBlack);
+    return;
 	}
+
+  text_layer_set_font(s_time_layer, s_time_font);
+
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "%d", (int) success);
+
+  point_counter++;
+
+  update_point_counter();
 }
 
-static void read_humanorzombie() {
-	
-	// Check to see if human or zombie already exists
-  if (persist_exists(PERSIST_RACE)) {
-    // Load stored count
-    race = persist_read_int(PERSIST_RACE);
-  }
-	
-	if (race == human) {
-		window_set_background_color(s_main_window, GColorBlue);
-		
-		// Create GFont
-		s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_HUMAN_FONT_40));
-
-		// Apply GFont to TextLayer
-		text_layer_set_font(s_time_layer, s_time_font);
-		
-		persist_write_int(PERSIST_RACE, 0);
-	} else if (race == zombie) {
-		window_set_background_color(s_main_window, GColorRed);
-		
-		// Create GFont
-		s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ZOMBIE_CONTROL_40));
-
-		// Apply GFont to TextLayer
-		text_layer_set_font(s_time_layer, s_time_font);
-		
-		persist_write_int(PERSIST_RACE, 1);
-	} else {
-		window_set_background_color(s_main_window, GColorBlack);
-	}
-}
-
-static void update_time() {
+void update_time() {
   // Get a tm structure
   time_t temp = time(NULL); 
   struct tm *tick_time = localtime(&temp);
@@ -162,23 +83,6 @@ static void update_time() {
 
 	// Show the date
 	text_layer_set_text(s_date_layer, date_buffer);
-}
-
-static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-	update_time();
-	
-	// Get location update every minute
-	if(tick_time->tm_min % 1 == 0) {
-		// Begin dictionary
-		DictionaryIterator *iter;
-		app_message_outbox_begin(&iter);
-
-		// Add a key-value pair
-		dict_write_uint8(iter, 0, 0);
-
-		// Send the message!
-		app_message_outbox_send();
-	}
 }
 
 // The primary method of communication for all Pebble watchapps and watchfaces is the AppMessage API. 
