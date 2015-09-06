@@ -1,38 +1,5 @@
 #include <pebble.h>
-
-int main(void);
-
-static const SmartstrapServiceId SERVICE_ID = 0x1001;
-
-typedef struct {
-  SmartstrapAttributeId id;
-  size_t length;
-  SmartstrapAttribute *ptr;
-} attribute_tuple;
-
-typedef struct {
-  attribute_tuple led;
-  attribute_tuple tpin23;
-  attribute_tuple tpin22;
-} Attribute;
-
-static Attribute attribute = {
-  .led = {
-    0x0001,
-    1,
-    NULL
-  },
-  .tpin22 = {
-    0x0003,
-    1,
-    NULL
-  },
-  .tpin23 = {
-    0x0004,
-    1,
-    NULL
-  }
-};
+#include "zombie.h"
 
 #define LOCATION_LATITUDE 0
 #define LOCATION_LONGITUDE 1
@@ -40,10 +7,6 @@ static Attribute attribute = {
 #define PERSIST_POINT_COUNTER 10
 #define PERSIST_HUMANORZOMBIE 11
 	
-static Window *s_main_window;
-static TextLayer *s_time_layer, *s_date_layer, *s_location_layer;
-static GFont s_time_font, s_date_font, s_location_font;
-
 // latitude/longitude buffers
 // static char latitude_buffer[32];
 // static char longitude_buffer[32];
@@ -53,7 +16,7 @@ static GFont s_time_font, s_date_font, s_location_font;
 static char point_counter_buffer[32];
 
 // ZOMBIE OR HUMAN? Human = 0 = blue; Zombie = 1 = red;
-int red_or_blue = 0;
+// int red_or_blue = 0;
 
 //Led toggles,
 //int tpin23 = 1;
@@ -154,8 +117,7 @@ static void read_point_counter() {
 }
 
 static void update_humanorzombie() {
-	// 0 = Human, 1 = Zombie
-	if (red_or_blue == 0) {
+  if (race == human) {
 		window_set_background_color(s_main_window, GColorRed);
 		
 		// Create GFont
@@ -164,7 +126,7 @@ static void update_humanorzombie() {
 		// Apply GFont to TextLayer
 		text_layer_set_font(s_time_layer, s_time_font);
 		
-		red_or_blue = 1; // change to zombie
+    race = zombie;
     prv_set_tpin23_attribute(false);
     prv_set_tpin22_attribute(true);
 		status_t success = 	persist_write_int(PERSIST_HUMANORZOMBIE, 1);
@@ -176,7 +138,7 @@ static void update_humanorzombie() {
 		
 		update_point_counter();
 		
-	} else if (red_or_blue == 1) {
+	} else if (race == zombie) {
 		window_set_background_color(s_main_window, GColorBlue);
 		
 		// Create GFont
@@ -185,7 +147,7 @@ static void update_humanorzombie() {
 		// Apply GFont to TextLayer
 		text_layer_set_font(s_time_layer, s_time_font);
 		
-		red_or_blue = 0; // change to human
+		race = human; // change to human
     prv_set_tpin23_attribute(true);
     prv_set_tpin22_attribute(false);
 		status_t success = persist_write_int(PERSIST_HUMANORZOMBIE, 0);
@@ -205,10 +167,10 @@ static void read_humanorzombie() {
 	// Check to see if human or zombie already exists
   if (persist_exists(PERSIST_HUMANORZOMBIE)) {
     // Load stored count
-    red_or_blue = persist_read_int(PERSIST_HUMANORZOMBIE);
+    race = persist_read_int(PERSIST_HUMANORZOMBIE);
   }
 	
-	if (red_or_blue == 0) {
+	if (race == human) {
 		window_set_background_color(s_main_window, GColorBlue);
 		
 		// Create GFont
@@ -218,7 +180,7 @@ static void read_humanorzombie() {
 		text_layer_set_font(s_time_layer, s_time_font);
 		
 		persist_write_int(PERSIST_HUMANORZOMBIE, 0);
-	} else if (red_or_blue == 1) {
+	} else if (race == zombie) {
 		window_set_background_color(s_main_window, GColorRed);
 		
 		// Create GFont
