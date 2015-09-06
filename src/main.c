@@ -69,24 +69,24 @@ static void prv_availability_changed(SmartstrapServiceId service_id, bool availa
 //  }
 }
 
-static void prv_did_read(SmartstrapAttribute *attr, SmartstrapResult result,
-                         const uint8_t *data, size_t length) {
-  if (attr != uptime_attribute) {
-    return;
-  }
-  if (result != SmartstrapResultOk) {
-    APP_LOG(APP_LOG_LEVEL_ERROR, "Read failed with result %d", result);
-    return;
-  }
-  if (length != UPTIME_ATTRIBUTE_LENGTH) {
-    APP_LOG(APP_LOG_LEVEL_ERROR, "Got response of unexpected length (%d)", length);
-    return;
-  }
+//static void prv_did_read(SmartstrapAttribute *attr, SmartstrapResult result,
+//                         const uint8_t *data, size_t length) {
+//  if (attr != uptime_attribute) {
+//    return;
+//  }
+//  if (result != SmartstrapResultOk) {
+//    APP_LOG(APP_LOG_LEVEL_ERROR, "Read failed with result %d", result);
+//    return;
+//  }
+//  if (length != UPTIME_ATTRIBUTE_LENGTH) {
+//    APP_LOG(APP_LOG_LEVEL_ERROR, "Got response of unexpected length (%d)", length);
+//    return;
+//  }
 
 //  static char uptime_buffer[20];
 //  snprintf(uptime_buffer, 20, "%u", (unsigned int)*(uint32_t *)data);
 //  text_layer_set_text(uptime_text_layer, uptime_buffer);
-}
+//}
 
 static void prv_set_led_attribute(bool on) {
   SmartstrapResult result;
@@ -455,8 +455,8 @@ static void init() {
     // setup smartstrap
   SmartstrapHandlers handlers = (SmartstrapHandlers) {
     .availability_did_change = prv_availability_changed,
-    .did_read = prv_did_read,
-    .notified = prv_notified,
+//    .did_read = prv_did_read,
+//    .notified = prv_notified,
   };
   smartstrap_subscribe(handlers);
   led_attribute = smartstrap_attribute_create(SERVICE_ID, LED_ATTRIBUTE_ID, LED_ATTRIBUTE_LENGTH);
