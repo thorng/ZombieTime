@@ -29,58 +29,20 @@ static void prv_availability_changed(SmartstrapServiceId service_id, bool availa
   }
   */
 }
-/*
-static void prv_set_led_attribute(bool on) {
+
+static void prv_set_led_attribute(enum Race currentRace) {
   SmartstrapResult result;
   uint8_t *buffer;
   size_t length;
-  result = smartstrap_attribute_begin_write(attribute.led.ptr, &buffer, &length);
+  result = smartstrap_attribute_begin_write(attribute.race.ptr, &buffer, &length);
   if (result != SmartstrapResultOk) {
     APP_LOG(APP_LOG_LEVEL_ERROR, "Begin write failed with error %d", result);
     return;
   }
 
-  buffer[0] = on;
+  memcpy(buffer, &currentRace, sizeof(currentRace));
 
-  result = smartstrap_attribute_end_write(attribute.led.ptr, 1, false);
-  if (result != SmartstrapResultOk) {
-    APP_LOG(APP_LOG_LEVEL_ERROR, "End write failed with error %d", result);
-    return;
-  }
-}
-*/
-static void prv_set_tpin23_attribute(bool on) {
-  SmartstrapResult result;
-  uint8_t *buffer;
-  size_t length;
-  result = smartstrap_attribute_begin_write(attribute.tpin23.ptr, &buffer, &length);
-  if (result != SmartstrapResultOk) {
-    APP_LOG(APP_LOG_LEVEL_ERROR, "Begin write failed with error %d", result);
-    return;
-  }
-
-  buffer[0] = on;
-
-  result = smartstrap_attribute_end_write(attribute.tpin23.ptr, 1, false);
-  if (result != SmartstrapResultOk) {
-    APP_LOG(APP_LOG_LEVEL_ERROR, "End write failed with error %d", result);
-    return;
-  }
-}
-
-static void prv_set_tpin22_attribute(bool on) {
-  SmartstrapResult result;
-  uint8_t *buffer;
-  size_t length;
-  result = smartstrap_attribute_begin_write(attribute.tpin22.ptr, &buffer, &length);
-  if (result != SmartstrapResultOk) {
-    APP_LOG(APP_LOG_LEVEL_ERROR, "Begin write failed with error %d", result);
-    return;
-  }
-
-  buffer[0] = on;
-
-  result = smartstrap_attribute_end_write(attribute.tpin22.ptr, 1, false);
+  result = smartstrap_attribute_end_write(attribute.race.ptr, sizeof(currentRace), false);
   if (result != SmartstrapResultOk) {
     APP_LOG(APP_LOG_LEVEL_ERROR, "End write failed with error %d", result);
     return;
@@ -110,8 +72,6 @@ static void update_humanorzombie() {
 		text_layer_set_font(s_time_layer, s_time_font);
 		
     race = zombie;
-    prv_set_tpin23_attribute(false);
-    prv_set_tpin22_attribute(true);
 		status_t success = 	persist_write_int(PERSIST_RACE, 1);
 		//persist_write_int(PERSIST_RACE, 1);
 		
@@ -130,9 +90,7 @@ static void update_humanorzombie() {
 		// Apply GFont to TextLayer
 		text_layer_set_font(s_time_layer, s_time_font);
 		
-		race = human; // change to human
-    prv_set_tpin23_attribute(true);
-    prv_set_tpin22_attribute(false);
+		race = human;
 		status_t success = persist_write_int(PERSIST_RACE, 0);
 		
 		APP_LOG(APP_LOG_LEVEL_DEBUG, "%d", (int)success);

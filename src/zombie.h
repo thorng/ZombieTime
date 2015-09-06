@@ -11,9 +11,7 @@ typedef struct {
 } attribute_tuple;
 
 typedef struct {
-  attribute_tuple led;
-  attribute_tuple tpin23;
-  attribute_tuple tpin22;
+  attribute_tuple race;
 } Attribute;
 
 enum Race {
@@ -23,18 +21,8 @@ enum Race {
 
 // static Variables
 static Attribute attribute = {
-  .led = {
+  .race = {
     .id = 0x0001,
-    .length = 1,
-    .ptr = NULL
-  },
- .tpin22 = {
-    .id = 0x0003,
-    .length = 1,
-    .ptr = NULL
-  },
- .tpin23 = {
-    .id = 0x0004,
     .length = 1,
     .ptr = NULL
   }
